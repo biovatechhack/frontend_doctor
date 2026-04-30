@@ -15,7 +15,7 @@ const Header = () => {
             placeholder="بحث عن مريض بالاسم أو رقم الهوية..."
           />
         </div>
-        <span className="text-blue-600 font-semibold text-lg mr-4">نظام ميد-إي آي</span>
+        <span className="text-blue-600 font-semibold text-lg mr-4">Suivini Doctor</span>
       </div>
 
       <div className="flex items-center space-x-reverse space-x-4">

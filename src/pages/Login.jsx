@@ -20,7 +20,7 @@ const Login = () => {
         <div className="bg-blue-700 text-white w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
           <BriefcaseMedical size={32} />
         </div>
-        <h1 className="text-3xl font-bold text-blue-800 tracking-wide mb-2">suivini</h1>
+        <h1 className="text-3xl font-bold text-blue-800 tracking-wide mb-2">Suivini Doctor</h1>
         <p className="text-gray-500 text-sm">المنصة الطبية المتكاملة للرعاية الذكية</p>
       </div>
 

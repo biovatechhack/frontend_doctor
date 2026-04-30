@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import Chatbot from './Chatbot';
 
 const Layout = () => {
   return (
@@ -16,6 +17,8 @@ const Layout = () => {
         {/* Scrollable Document Area */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f0f4f9] p-6 text-gray-800 relative">
           <Outlet />
+          {/* Chatbot overlay */}
+          <Chatbot />
         </main>
       </div>
     </div>
@@ -23,3 +26,4 @@ const Layout = () => {
 };
 
 export default Layout;
+

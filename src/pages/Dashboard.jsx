@@ -1,14 +1,54 @@
-import React from 'react';
-import { dashStats, highRiskPatients, emergencyLogs, resourceAllocation } from '../data/mockData';
-import { AlertTriangle, Activity, Clock, Stethoscope, Eye, CheckCircle, Info, Thermometer, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { getDashboardStats, getHighRiskPatients, getEmergencyLogs, getResourceAllocation } from '../api/mockApi';
+import { AlertTriangle, Activity, Clock, Stethoscope, Eye, CheckCircle, Info, ShieldCheck, Loader2 } from 'lucide-react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Dashboard = () => {
-  const hasEmergencies = dashStats.activeEmergencies > 0;
+  const [stats, setStats] = useState(null);
+  const [highRisk, setHighRisk] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [s, hr, l, r] = await Promise.all([
+          getDashboardStats(),
+          getHighRiskPatients(),
+          getEmergencyLogs(),
+          getResourceAllocation()
+        ]);
+        setStats(s);
+        setHighRisk(hr);
+        setLogs(l);
+        setResources(r);
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" />
+        <p className="mt-4 text-gray-500 font-medium animate-pulse">جاري تحميل بيانات لوحة التحكم...</p>
+      </div>
+    );
+  }
+
+  const hasEmergencies = stats?.activeEmergencies > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-700">
       {/* Active Emergencies Banner */}
-      <div className={`${hasEmergencies ? 'bg-red-700' : 'bg-blue-800'} text-white rounded-xl p-4 flex items-center justify-between shadow-sm transition-colors`}>
+      <div className={`${hasEmergencies ? 'bg-red-700' : 'bg-[#1e3a8a]'} text-white rounded-xl p-4 flex items-center justify-between shadow-sm transition-colors duration-500`}>
         <button className={`bg-white px-6 py-2 rounded-lg font-bold text-sm transition ${hasEmergencies ? 'text-red-700 hover:bg-red-50' : 'text-blue-800 hover:bg-blue-50'}`}>
           عرض الكل
         </button>
@@ -19,7 +59,7 @@ const Dashboard = () => {
             </h2>
             <p className={`text-sm mt-1 ${hasEmergencies ? 'text-red-200' : 'text-blue-200'}`}>
                {hasEmergencies 
-                  ? `يوجد حالياً ${dashStats.activeEmergencies} حالات تتطلب تدخل فوري. من فضل التوجه للطوارئ.`
+                  ? `يوجد حالياً ${stats.activeEmergencies} حالات تتطلب تدخل فوري. من فضل التوجه للطوارئ.`
                   : 'لا توجد حالات طارئة نشطة في الوقت الحالي. الموارد تعمل بكفاءة.'}
             </p>
           </div>
@@ -32,40 +72,40 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Patients */}
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
              <span className="text-green-500 font-bold text-sm bg-green-50 px-2 py-1 rounded">
-              {dashStats.patientTrend} نمو
+              {stats?.patientTrend} نمو
             </span>
             <div className="text-right">
               <p className="text-gray-500 text-sm mb-1">إجمالي المرضى</p>
-              <h3 className="text-3xl font-bold text-blue-800">{dashStats.totalPatients}</h3>
+              <h3 className="text-3xl font-bold text-blue-800">{stats?.totalPatients}</h3>
             </div>
           </div>
         </div>
 
         {/* Avg Response Time */}
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
              <span className="text-green-500 font-bold text-sm bg-green-50 px-2 py-1 rounded">
-              {dashStats.responseTrend} تحسن
+              {stats?.responseTrend} تحسن
             </span>
             <div className="text-right">
               <p className="text-gray-500 text-sm mb-1">وقت الاستجابة</p>
-              <h3 className="text-3xl font-bold text-gray-800">{dashStats.avgResponseTime}</h3>
+              <h3 className="text-3xl font-bold text-gray-800">{stats?.avgResponseTime}</h3>
             </div>
           </div>
         </div>
 
         {/* Operations/Resources */}
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
            <div className="flex justify-between items-start">
              <span className="text-gray-500 text-sm pt-1">
-              {dashStats.operationsLabel}
+              {stats?.operationsLabel}
             </span>
             <div className="text-right">
               <p className="text-gray-500 text-sm mb-1">غرف العمليات</p>
-              <h3 className="text-3xl font-bold text-gray-800">{dashStats.operations}</h3>
+              <h3 className="text-3xl font-bold text-gray-800">{stats?.operations}</h3>
             </div>
           </div>
         </div>
@@ -79,8 +119,8 @@ const Dashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {highRiskPatients.map((patient) => (
-            <div key={patient.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm flex flex-col">
+          {highRisk.map((patient) => (
+            <div key={patient.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm flex flex-col hover:border-red-200 transition-colors">
               {/* Card Header */}
               <div className="p-4 border-b border-gray-100">
                  <div className="flex justify-between items-start mb-2">
@@ -144,7 +184,7 @@ const Dashboard = () => {
            </div>
            
            <div className="space-y-4">
-             {emergencyLogs.map((log, index) => (
+             {logs.map((log, index) => (
                <div key={index} className={`flex p-3 rounded-lg border-r-4 ${
                  log.type === 'alert' ? 'bg-red-50 border-red-500' :
                  log.type === 'info' ? 'bg-blue-50 border-blue-500' :
@@ -153,7 +193,7 @@ const Dashboard = () => {
                   <div className="w-16 flex-shrink-0 text-sm text-gray-500 font-medium pt-1">
                      {log.time}
                   </div>
-                  <div className="flex-1 ml-4 ml-0 pr-4 border-r border-gray-200 text-right">
+                  <div className="flex-1 pr-4 border-r border-gray-200 text-right">
                      <h4 className="font-bold text-gray-800">{log.title}</h4>
                      <p className="text-sm text-gray-600 mt-1">{log.desc}</p>
                   </div>
@@ -177,7 +217,7 @@ const Dashboard = () => {
            <h3 className="text-lg font-bold text-gray-800 mb-6 text-right">توزيع الموارد</h3>
            
            <div className="space-y-6">
-             {resourceAllocation.map((resource, index) => (
+             {resources.map((resource, index) => (
                 <div key={index}>
                    <div className="flex justify-between items-center mb-2">
                       <span className="font-bold text-sm text-gray-800">{resource.used}/{resource.total}</span>
